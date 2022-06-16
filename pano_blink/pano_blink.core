@@ -1,0 +1,45 @@
+CAPI=2:
+name: ::pano_blink:0.1
+description: Blink LED on Pano
+
+filesets:
+    rtl:
+        files:
+            - rtl/blink.v : {file_type: verilogSource}
+    constraints:
+        files:
+            - constraints/pano.ucf : {file_type: UCF}
+    scripts:
+        files:
+            - "tool_ise? (scripts/ise.tcl)" : {file_type : user, copyto : ise.tcl}            
+            - "tool_ise? (scripts/ise.tcl)" : {file_type : tclSource}
+    edif:
+        files:
+            - build/pano_blink_0.1/pano_g2_synth-yosys/pano_blink_0.1.edif : {file_type: edif}
+            
+# TODO: Add support in edalize for yosys->ise design flow
+# Update yosys template to use surelog integration plugin
+# for system verilog support.
+targets:
+    pano_g2_synth:
+        default_tool: yosys
+        filesets: [rtl]
+        toplevel: [top]
+        tools:
+            yosys:
+                arch: xilinx
+                #yosys_template: yosys/yosys-script-tcl
+                #yosys_as_subtool: 1
+                output_format: edif
+
+    pano_g2_pnr:
+        default_tool: ise
+        filesets: [edif, scripts, constraints]
+        toplevel: [top]
+        tools:
+            ise:
+                family: spartan6
+                device: xc6slx100
+                package: fgg484
+                speed: -2
+                
