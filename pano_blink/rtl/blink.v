@@ -1,5 +1,5 @@
 
-module top(
+module blink(
 	input SYSCLK,
 	output LED_RED,
 	output LED_BLUE,

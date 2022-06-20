@@ -11,35 +11,27 @@ filesets:
             - constraints/pano.ucf : {file_type: UCF}
     scripts:
         files:
-            - "tool_ise? (scripts/ise.tcl)" : {file_type : user, copyto : ise.tcl}            
-            - "tool_ise? (scripts/ise.tcl)" : {file_type : tclSource}
-    edif:
-        files:
-            - build/pano_blink_0.1/pano_g2_synth-yosys/pano_blink_0.1.edif : {file_type: edif}
+            - "tool_ise? (scripts/ise.tcl)" : {file_type : iseTclSource}
             
 # TODO: Add support in edalize for yosys->ise design flow
 # Update yosys template to use surelog integration plugin
 # for system verilog support.
 targets:
-    pano_g2_synth:
-        default_tool: yosys
-        filesets: [rtl]
-        toplevel: [top]
-        tools:
-            yosys:
-                arch: xilinx
-                #yosys_template: yosys/yosys-script-tcl
-                #yosys_as_subtool: 1
-                output_format: edif
-
-    pano_g2_pnr:
+    pano_g2:
         default_tool: ise
-        filesets: [edif, scripts, constraints]
-        toplevel: [top]
+        filesets: [rtl, scripts, constraints]
+        toplevel: [blink]
         tools:
             ise:
                 family: spartan6
                 device: xc6slx100
                 package: fgg484
                 speed: -2
-                
+                # Pick one - must use yosys with surelog integration
+                # if compiling systemverilog. Repo can be found here:
+                # https://github.com/antmicro/yosys-uhdm-plugin-integration.git
+                #synth: ise
+                synth: yosys
+                yosys_synth_options: ['-iopad', '-family xc6', '-run :check', "frontend=surelog"]
+                yosys_read_options: ['-noassert']
+                surelog_options: ['-DSYNTHESIS']
